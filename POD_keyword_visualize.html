@@ -114,6 +114,23 @@ function buildSelectionList() {
     
 }
 
+function dragStarted(d) {
+  if (!d3.event.active) forceMap.alphaTarget(0.3).restart();
+  d.fx = d.x;
+  d.fy = d.y;
+}
+
+function dragged(d) {
+  d.fx = d3.event.x;
+  d.fy = d3.event.y;
+}
+
+function dragEnded(d) {
+  if (!d3.event.active) forceMap.alphaTarget(0);
+  d.fx = null;
+  d.fy = null;
+}
+
 function displayForceMap() {
 
   // Create a subset for all the keywords that are marked to show.
@@ -148,7 +165,11 @@ function displayForceMap() {
   node.enter().append("circle")
                 .attr("r", function (d) { return areaScale(d.datasetCount); })
                 .attr("id", function(d) { return d.id; })
-    .merge(node);
+      .merge(node)
+      .call(d3.drag()
+        .on("start",dragStarted)
+        .on("drag",dragged)
+        .on("end",dragEnded));
 
   // Add the keyword name as the title of each circle.
   node.append("title").text(function(d) { return d.id });
