@@ -268,7 +268,7 @@ function toggleKeyword(i) {
 }
 
 //Initialize DOM elements within the SVG element for the nodes and edges.
-svg.append("g").attr("class","nodes");
 svg.append("g").attr("class","edges");
+svg.append("g").attr("class","nodes");
 
 document.getElementById("map_button").onclick = mapKeywords;
