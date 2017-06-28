@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/> <title>Project Open Data keyword map</title>
+</head>
+<body>
+<style>
+.edges line {
+  stroke: #999;
+  stroke-opacity: 0.6;
+}
+
+.nodes circle {
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+</style>
+
+    <h1>Project Open Data keyword map.</h1>
+    <p>Enter the URL of a JSON file to map. The file must be compliant with
+    the <a href="https://project-open-data.cio.gov/v1.1/schema/">Project
+    Open Data Metadata Schema</a></p>
+    <p><label for="pod_url">URL</label>
+    <input type="text" id="pod_url" size="60"
+        value="https://www.healthdata.gov/data.json">
+    <button type="button" id="map_button">Map</button></p>
+    <p><label id="number_datasets">Processed 0 of 0 datasets.</label></p>
+    <div id="map" width="500" height="500">
+    <p><label for="keywords">Select the Keywords to map</label>
+    <select id="keywords" size="25" multiple onchange="toggleKeyword(this.selectedIndex)"></select></p>
+    <svg/>
+    </div>
+
+<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+<script type="text/javascript" src="pod_keyword_visualize.js"></script>
+</body>
+</html>
