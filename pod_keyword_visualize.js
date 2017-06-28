@@ -255,8 +255,13 @@ function mapKeywords() {
 // Callback function to toggle showing a keyword based on the selection
 // list.
 function toggleKeyword(i) {
-  // Set the corresponding keyword show value.
-  keywords.nodes[i].show = !keywords.nodes[i].show;
+  // Scan the selection list and set the corresponding node show values
+  // based on whether the corresponding option is selected.
+  var sl = document.getElementById("keywords");
+  for (var i = 0; i < sl.length; i++) {
+    keywords.nodes[i].show = sl.options[i].selected;
+  }
+  
   
   // Redraw the force map with the new selection.
   displayForceMap();
