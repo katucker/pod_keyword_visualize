@@ -56,6 +56,7 @@ var NUMBER_INITIAL_KEYWORDS = 20;
 var PADDING = 50;
 var ITERATIONS = 4;
 var REPULSION = -150;
+var PROXY = "cors-anywhere.herokuapp.com/";
 
 var keywords = { nodes: [] };
 var displayNodes = [];
@@ -229,7 +230,10 @@ function setProgress(count, limit) {
 // Load completion callback, with error handling.
 function aggregateKeywords(error, datasets) {
 
-  if (error) throw error;
+  if (error) {
+    alert(error);
+    return;
+  }
 
   // Aggregate the list of keywords and connections between keywords
   // for mapping in a D3 force layout.
@@ -311,6 +315,17 @@ function aggregateKeywords(error, datasets) {
 function mapKeywords() {
 
   var url = document.getElementById("pod_url").value;
+  
+  // Insert a proxy to load the specified JSON data file even if it
+  // is not properly configured for Cross Origin Resource Sharing.
+  var pathIndex = url.indexOf("://");
+  if (pathIndex > -1) {
+    pathIndex += 3;
+    url = "https://" + PROXY + url.slice(pathIndex);
+  } else {
+    // No explicit protocol specified, so insert what's needed.
+    url = "https://" + PROXY + url;
+  }
 
   d3.json(url, aggregateKeywords);
 
