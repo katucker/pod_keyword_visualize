@@ -52,10 +52,11 @@ if (!Array.prototype.find) {
   });
 }
 
-var NUMBER_INITIAL_KEYWORDS = 20;
-var PADDING = 50;
-var ITERATIONS = 4;
-var REPULSION = -150;
+var NUMBER_INITIAL_KEYWORDS = 10;
+var PADDING = 10;
+var ITERATIONS = 6;
+var COLLISION = 0.5;
+var REPULSION = -175;
 var PROXY = "cors-anywhere.herokuapp.com/";
 
 var keywords = { nodes: [] };
@@ -101,10 +102,10 @@ var forceMap = d3.forceSimulation()
                  .force("link", d3.forceLink()
                                     .id( function(d) { return d.id; }))
                  .force("charge", d3.forceManyBody().strength(REPULSION))
-//                 .force("center", d3.forceCenter(width/2, height/2))
                  .force("xPos", d3.forceX())
                  .force("yPos", d3.forceY())
                  .on("tick",ticked);
+forceMap.force("collide").strength(COLLISION);
     
 function buildSelectionList() {
   // Build a selection list for the aggregated keywords. Remove any
@@ -207,7 +208,7 @@ function displayForceMap() {
   forceMap.nodes(displayNodes);
   
   // Set the collision force to use the updated radius of each node.
-  forceMap.force("collide").radius(function(d) { return areaScale(d.datasetCount); });
+  forceMap.force("collide").radius(function(d) { return areaScale(d.datasetCount) + PADDING; });
   
   // Load the edges into the link force, and set it to use the new names and updated
   // distance value.
