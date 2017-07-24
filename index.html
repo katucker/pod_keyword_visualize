@@ -15,6 +15,15 @@
   stroke: #000;
   stroke-width: 1.5px;
 }
+
+#map {
+  position: relative;
+  left: 0px;
+  right: 20px;
+  top: 0px;
+  bottom: 20px;
+  border: 2px solid black;
+}
 </style>
 
     <h1>Project Open Data keyword map.</h1>
@@ -25,10 +34,10 @@
         value="https://www.healthdata.gov/data.json"></label>
     <button type="button" id="map_button">Map</button></p>
     <p><label id="number_datasets">Processed 0 of 0 datasets.</label></p>
-    <div id="map" width="500" height="500">
     <label><p>Keywords sorted by decreasing popularity. Select the Keywords to map.</p>
     <select id="keywords" size="15" multiple onchange="toggleKeyword(this.selectedIndex)"></select></label>
     <p/>
+    <div id="map">
     <svg/>
     </div>
 
