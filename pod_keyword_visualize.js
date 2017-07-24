@@ -65,13 +65,9 @@ var displayEdges = [];
 var node;
 var edge;
 
-var psvg = d3.select("#map"), 
-    width = +psvg.attr("width"),
-    height = +psvg.attr("height");
+var mapDiv = document.getElementById("map"); 
     
-var svg = d3.select("svg")
-            .attr("width",width)
-            .attr("height",height); 
+var svg = d3.select("svg");
 
 // A scaling function to map the keyword dataset count to the
 // appropriate area of its representative circle. This ensures the
@@ -146,7 +142,7 @@ function dragEnded(d) {
   d.fy = null;
 }
 
-function displayForceMap() {
+function selectForceMapContent() {
 
   // Create a subset for all the keywords that are marked to show.
   displayNodes = keywords.nodes.filter( function(d) { return d.show; });
@@ -162,18 +158,9 @@ function displayForceMap() {
     }
   }
   
-  // Set the area scale domain based on the largest number of datasets in the
-  // set of keywords to display.              
-  areaScale.domain([1,d3.max(displayNodes, function(d) { return d.datasetCount; })]);
-  
-  // Set the area scale range to ensure the circles can all fit within
-  // the width and height of the svg area without overlapping.
-  areaScale.range([1,d3.min([(width/displayNodes.length), (height/displayNodes.length)])]);
-
-  // Retrieve the list of nodes, set it to the new data set and adjust any existing radii.  
+  // Retrieve the list of nodes, set it to the new data set.  
   node = svg.selectAll(".node")
-            .data(displayNodes, function(d) { return d ? d.id : this.id; })
-            .attr("r", function (d) { return areaScale(d.datasetCount); });
+            .data(displayNodes, function(d) { return d ? d.id : this.id; });
   // Retrieve the list of edges between nodes, and set it to the new data.
   edge = svg.selectAll(".edge")
             .data(displayEdges);
@@ -187,7 +174,6 @@ function displayForceMap() {
   node.enter().append("circle")
                 .classed("node", true)
                 .attr("id", function(d) { return d.id; })
-                .attr("r", function (d) { return areaScale(d.datasetCount); })
                 .merge(node)
                    .call(d3.drag()
                            .on("start",dragStarted)
@@ -199,25 +185,57 @@ function displayForceMap() {
   // Create lines between the circles for the keyword connections.
   edge.enter().insert("line", ".node").classed("edge", true);
 
+  // Load the nodes and edges into the force map.
+  forceMap.nodes(displayNodes);
+  
+  // Load the edges into the link force, and set it to use the new names and updated
+  // distance value.
+  forceMap.force("link").links(displayEdges);
+                        
+}
+
+function displayForceMap() {
+
+  // Read the size from the div element enclosing the SVG element.
+  var width = mapDiv.offsetWidth - (PADDING * 2);
+  var height = window.innerHeight - mapDiv.offsetTop - (PADDING * 2);
+  
+  // Set the SVG size to match.
+  svg.attr("width", width)
+     .attr("height", height);
+  
+  // Set the area scale domain based on the largest number of datasets in the
+  // set of keywords to display.              
+  areaScale.domain([1,d3.max(displayNodes, function(d) { return d.datasetCount; })]);
+  
+  // Set the area scale range to ensure the circles can all fit within
+  // the width and height of the svg area without overlapping.
+  areaScale.range([1,d3.min([(width/displayNodes.length), (height/displayNodes.length)])]);
+
+  // Retrieve the list of nodes and adjust the radii.  
+  node = svg.selectAll(".node")
+            .attr("r", function (d) { return areaScale(d.datasetCount); });
+  // Retrieve the list of edges between nodes, and set it to the new data.
+  edge = svg.selectAll(".edge");
+                 
+  // Create lines between the circles for the keyword connections.
+  edge.enter().insert("line", ".node").classed("edge", true);
+
   // Compute the optimal value to use for the link distance, such that all the selected
   // nodes should fit within the display area.
   var dist = (Math.min(width,height) / (displayNodes.length ? displayNodes.length : 1))
     + PADDING;
-  
-  // Load the nodes and edges into the force map.
-  forceMap.nodes(displayNodes);
   
   // Set the collision force to use the updated radius of each node.
   forceMap.force("collide").radius(function(d) { return areaScale(d.datasetCount) + PADDING; });
   
   // Load the edges into the link force, and set it to use the new names and updated
   // distance value.
-  forceMap.force("link").links(displayEdges)
-                        .distance(dist);
+  forceMap.force("link").distance(dist);
                         
   // Initialize each node to a random position near the center of the graph area.
-  forceMap.force("xPos").x(function (d) { return width/2 + Math.random() });
-  forceMap.force("yPos").y(function (d) { return height/2 + Math.random() });
+  forceMap.force("xPos").x(function (d) { return width/2 + (Math.random() * PADDING) });
+  forceMap.force("yPos").y(function (d) { return height/2 + (Math.random() * PADDING) });
   
   // Restart the simulation on the new data.
   forceMap.alpha(1).restart();
@@ -306,6 +324,8 @@ function aggregateKeywords(error, datasets) {
   }
 
   buildSelectionList();
+  
+  selectForceMapContent();
 
   displayForceMap();
 
@@ -342,13 +362,13 @@ function toggleKeyword(i) {
     keywords.nodes[i].show = sl.options[i].selected;
   }
   
+  // Update the nodes and edges based on the new selection.
+  selectForceMapContent();
   
-  // Redraw the force map with the new selection.
+  // Redraw the force map.
   displayForceMap();
 }
 
-//Initialize DOM elements within the SVG element for the nodes and edges.
-//svg.append("g").attr("class","edges");
-//svg.append("g").attr("class","nodes");
-
 document.getElementById("map_button").onclick = mapKeywords;
+
+window.addEventListener("resize", displayForceMap);
